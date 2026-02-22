@@ -36,3 +36,12 @@ xcelium> run
 [PASS] Addr A: Expected 5A, Got 5a
 Simulation Finished!
 Simulation complete via $finish(1) at time 56 NS + 0
+
+## 6. Key Learning: Layout to DV Insights
+
+7.5년의 레이아웃 설계 경험을 바탕으로 본 프로젝트를 수행하며 얻은 핵심 인사이트입니다.
+
+* **물리적 구조의 추상화 (Abstraction):** 실제 Tr과 Capacitor로 구성된 복잡한 Cell Array를 SystemVerilog의 `reg array`로 추상화하여 모델링하는 법을 익혔습니다. 이는 시뮬레이션 속도를 높이면서도 논리적 무결성을 검증하는 DV의 핵심 원리를 이해하는 계기가 되었습니다.
+* **디코딩 로직의 이해:** 레이아웃에서 패턴으로만 보던 Wordline/Bitline의 선택 과정이 로직상에서는 Address Decoding을 통해 어떻게 구현되는지 코드로 직접 확인했습니다.
+* **타이밍 개념의 확장:** Physical 설계에서 중요하게 다뤘던 **Setup/Hold Time**과 신호 지연(Delay)이 시뮬레이션 환경에서는 `#1` 딜레이나 클럭 에지(Clock Edge) 제어를 통해 어떻게 보장되는지 학습했습니다.
+* **Self-Checking Testbench:** 사람이 직접 파형을 눈으로 확인하는 것이 아니라, 코드가 스스로 결과를 비교하고 `[PASS]/[FAIL]`을 출력하게 만드는 '자동화 검증'의 기초를 다졌습니다.
