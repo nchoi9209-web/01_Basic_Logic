@@ -19,43 +19,60 @@ module tb_row_col_dram;
     // 100MHz 클럭 생성
     always #5 clk = ~clk;
 
-    integer r, c; // 루프용 변수 (Row, Column)
+    integer r, c;
+    integer pass_count = 0;
 
     initial begin
         // 1. 초기화 및 리셋
         clk = 0; rst_n = 0; write_en = 0; addr = 0; wdata = 0;
         #15 rst_n = 1;
 
-        // 2. [Write Loop] 256개 모든 셀에 데이터 쓰기
-        // Row 0~15를 돌면서 그 안의 Col 0~15를 다 채움
+        // 2. [Write Loop]
         for (r = 0; r < 16; r = r + 1) begin
             for (c = 0; c < 16; c = c + 1) begin
                 @(posedge clk);
+                #1; // ★ 클럭보다 1ns 늦게 주소를 줌 (타이밍 확보)
                 write_en = 1;
-                addr = {r[3:0], c[3:0]}; // Row와 Col을 합쳐서 8비트 주소 생성
-                wdata = r + c;           // 테스트용 데이터 (행+열 값)
+                addr = {r[3:0], c[3:0]}; 
+                wdata = r + c;           
             end
         end
 
-        // 3. 읽기 모드로 전환
+        // 3. 읽기 모드 전환
         @(posedge clk);
+        #1;
         write_en = 0;
 
-        // 4. [Read & Verify Loop] 데이터 확인
+        // 4. [Read & Verify Loop]
         for (r = 0; r < 16; r = r + 1) begin
             for (c = 0; c < 16; c = c + 1) begin
+                @(posedge clk);          // 1) 주소를 줄 타이밍 시작
+                #1;                      // 2) 클럭보다 1ns 늦게 주소 인가
                 addr = {r[3:0], c[3:0]};
-                @(posedge clk);
-                #1; // 안정화 대기
-                if (rdata === (r + c)) begin
-                    // 너무 많으니 통과 로그는 생략하거나 가끔만 출력
+                
+                @(posedge clk);          // 3) 한 클럭 대기 (DUT가 데이터를 내보낼 시간)
+                #1;                      // 4) 데이터가 안정된 후 비교
+                
+                if (rdata === (r[7:0] + c[7:0])) begin
+                    pass_count = pass_count + 1;
                 end else begin
                     $display("[FAIL] Row:%d, Col:%d | Exp:%h, Got:%h", r, c, (r+c), rdata);
                 end
             end
         end
 
-        $display("Full 256-Cell Simulation Finished! All Data Verified.");
+        // 5. 결과 출력
+        if (pass_count === 256)
+            $display("--- SUCCESS: All 256 cells verified! ---");
+        else
+            $display("--- FAILURE: %d cells failed. ---", (256 - pass_count));
+
         $finish;
+    end
+
+    // EPWave용 파형 저장
+    initial begin
+        $dumpfile("dump.vcd");
+        $dumpvars(0, tb_row_col_dram);
     end
 endmodule
