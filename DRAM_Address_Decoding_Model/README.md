@@ -23,6 +23,14 @@ Building upon the basic DRAM controller, this project implements a **2D Matrix s
 * **Dimensional Mapping:** Transitioned from a simple 1D list to a **2D Matrix logic**, which is essential for understanding more complex DRAM operations like 'Precharge' and 'Activation'.
 * **Scalability:** Understood that increasing memory capacity is about widening the address bus and expanding the decoder logic, not just adding more registers.
 
+## 5. Troubleshooting: Simulation Race Condition
+* **Issue:** During initial verification, a 1-clock cycle data mismatch occurred where `rdata` updated to the next value before the `addr` transition was fully sampled by the clock edge.
+* **Analysis:** * **Waveform Evidence:** In the zoomed-in waveform, the `rdata` changed exactly at the clock posedge, but it was already reflecting the data of the *next* address because the address transition and clock edge were perfectly aligned in the same delta-cycle.
+    * ![Race Condition Analysis](./image_1e9643.png)
+* **Solution:** Implemented a `#1` (1ns) step-delay in the testbench after the `posedge clk`. This ensures the address remains stable during the clock edge, mimicking physical hold time and allowing for accurate synchronous sampling.
+* **Result:** Successfully achieved a consistent 1-clock read latency and verified all 256 memory cells.
+    * ![Success Waveform](./image_1e8ba0.png)
+
 ---
 
 <a name="한국어-버전"></a>
@@ -43,3 +51,12 @@ Building upon the basic DRAM controller, this project implements a **2D Matrix s
 * **디코딩 로직의 효율성:** 단일 주소 버스를 Row/Col로 쪼개어 대규모 매트릭스를 제어하는 방식을 통해, 레이아웃의 X-Decoder와 Y-Decoder의 설계 효율성을 논리적으로 이해함.
 * **차원 매핑 능력:** 단순 1차원 리스트 구조에서 **2D Matrix 로직**으로 확장하며, 향후 Precharge나 Activation 같은 복잡한 DRAM 동작을 구현하기 위한 기초를 다짐.
 * **확장성 이해:** 메모리 용량 증설은 단순한 소자 추가가 아니라, 주소 버스의 확장과 디코더 로직의 고도화 과정임을 학습함.
+
+## 5. 문제 해결 및 디버깅 (Troubleshooting)
+### 시뮬레이션 Race Condition 해결
+* **문제 상황:** 초기 검증 과정에서 데이터 출력(`rdata`)이 입력 주소(`addr`) 변화보다 한 박자 빠르게 업데이트되어 데이터 불일치(`FAIL`) 발생.
+* **원인 분석:** * **파형 확인:** 클럭의 상승 엣지(Posedge)와 주소 변환 시점이 동일한 타임 슬롯에 겹치면서, 디자인(DUT)이 현재 주소가 아닌 '미래의 주소'를 먼저 샘플링하는 현상 발견.
+    * ![경쟁 상태 분석 파형](./image_1e9643.png)
+* **해결 방법:** 테스트벤치 코드에서 `posedge clk` 직후에 `#1` (1ns)의 미세 지연(Step-delay)을 추가하여 신호 간의 선후 관계를 명확히 함.
+* **결과:** 클럭 에지 순간에 주소 신호가 안정적으로 유지(Hold)되도록 하여, 의도한 대로 **1-Clock Read Latency**를 정확히 구현하고 256개 전체 셀 검증 성공.
+    * ![검증 성공 파형](./image_1e8ba0.png)
