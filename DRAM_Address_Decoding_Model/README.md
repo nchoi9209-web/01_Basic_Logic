@@ -26,10 +26,10 @@ Building upon the basic DRAM controller, this project implements a **2D Matrix s
 ## 5. Troubleshooting: Simulation Race Condition
 * **Issue:** During initial verification, a 1-clock cycle data mismatch occurred where `rdata` updated to the next value before the `addr` transition was fully sampled by the clock edge.
 * **Analysis:** * **Waveform Evidence:** In the zoomed-in waveform, the `rdata` changed exactly at the clock posedge, but it was already reflecting the data of the *next* address because the address transition and clock edge were perfectly aligned in the same delta-cycle.
-    * ![Race Condition Analysis](./image_1e9643.png)
+    * ![Race Condition Analysis](./first_wave.png)
 * **Solution:** Implemented a `#1` (1ns) step-delay in the testbench after the `posedge clk`. This ensures the address remains stable during the clock edge, mimicking physical hold time and allowing for accurate synchronous sampling.
 * **Result:** Successfully achieved a consistent 1-clock read latency and verified all 256 memory cells.
-    * ![Success Waveform](./image_1e8ba0.png)
+    * ![Success Waveform](./second_wave.png)
 
 ---
 
@@ -56,7 +56,7 @@ Building upon the basic DRAM controller, this project implements a **2D Matrix s
 ### 시뮬레이션 Race Condition 해결
 * **문제 상황:** 초기 검증 과정에서 데이터 출력(`rdata`)이 입력 주소(`addr`) 변화보다 한 박자 빠르게 업데이트되어 데이터 불일치(`FAIL`) 발생.
 * **원인 분석:** * **파형 확인:** 클럭의 상승 엣지(Posedge)와 주소 변환 시점이 동일한 타임 슬롯에 겹치면서, 디자인(DUT)이 현재 주소가 아닌 '미래의 주소'를 먼저 샘플링하는 현상 발견.
-    * ![경쟁 상태 분석 파형](./image_1e9643.png)
+    * ![경쟁 상태 분석 파형](./first_wave.png)
 * **해결 방법:** 테스트벤치 코드에서 `posedge clk` 직후에 `#1` (1ns)의 미세 지연(Step-delay)을 추가하여 신호 간의 선후 관계를 명확히 함.
 * **결과:** 클럭 에지 순간에 주소 신호가 안정적으로 유지(Hold)되도록 하여, 의도한 대로 **1-Clock Read Latency**를 정확히 구현하고 256개 전체 셀 검증 성공.
-    * ![검증 성공 파형](./image_1e8ba0.png)
+    * ![검증 성공 파형](./second_wave.png)
