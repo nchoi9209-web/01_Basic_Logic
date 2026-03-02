@@ -27,7 +27,7 @@ This project extends the 2D memory matrix into a **Multi-Bank DRAM architecture*
 
 ## 5. Verification
 * **Result:** Successfully passed all test cases covering all 4 banks with a consistent 1-clock read latency.
-![Bank Verification Waveform](./bank_wave.png)
+![Bank Verification Waveform](./image.png)
 
 ---
 
@@ -54,4 +54,4 @@ This project extends the 2D memory matrix into a **Multi-Bank DRAM architecture*
 
 ## 5. 검증 결과
 * **결과:** 4개 전체 뱅크에 대한 쓰기/읽기 테스트를 수행하여, 정확한 1-Clock Latency로 모든 케이스 통과(`PASS`).
-![뱅크 검증 파형](./bank_wave.png)
+![뱅크 검증 파형](./image.png)
